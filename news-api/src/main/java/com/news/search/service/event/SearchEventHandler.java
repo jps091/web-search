@@ -21,10 +21,31 @@ public class SearchEventHandler {
     private final SearchInfoJdbcQueryRepository queryRepository;
     private final SearchInfoJdbcCommandRepository commandRepository;
 
-    @Async
+    @Async("event-Executor1")
     @EventListener
-    public void handleEvent(SearchEvent event){
-        log.info("[SearchEventHandler] handleEvent: {}", event);
+    public void handleEvent1(SearchEvent event){
+        log.info("[Queue-SIZE-0 SearchEventHandler] handleEvent: {}", event);
+        List<String> inputQueryList = parseInputQueryList(event.query());
+        List<SearchInfoQueryResponse> savedQueryList = queryRepository.findByQueryList(inputQueryList);
+
+
+        if(isExistInputSearchInfo(savedQueryList)){
+            List<SearchInfo> searchInfoList = extractNewSearchQueryList(inputQueryList, savedQueryList, event.timestamp());
+            commandRepository.saveAll(searchInfoList);
+
+            List<Integer> ids = getSavedSearchInfoIds(savedQueryList);
+            commandRepository.increaseSearchCount(ids);
+            return;
+        }
+
+        List<SearchInfo> inputSearchInfoList = SearchInfo.create(inputQueryList, event.timestamp());
+        commandRepository.saveAll(inputSearchInfoList);
+    }
+
+    @Async("event-Executor2")
+    @EventListener
+    public void handleEvent2(SearchEvent2 event){
+        log.info("[Queue-SIZE-5 SearchEventHandler] handleEvent: {}", event);
         List<String> inputQueryList = parseInputQueryList(event.query());
         List<SearchInfoQueryResponse> savedQueryList = queryRepository.findByQueryList(inputQueryList);
 
