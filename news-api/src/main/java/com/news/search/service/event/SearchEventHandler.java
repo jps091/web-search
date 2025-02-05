@@ -4,6 +4,7 @@ import com.news.searchinfo.infrastructure.SearchInfoJdbcCommandRepository;
 import com.news.searchinfo.infrastructure.SearchInfoJdbcQueryRepository;
 import com.news.searchinfo.model.SearchInfo;
 import com.news.search.service.response.SearchInfoQueryResponse;
+import com.news.searchinfo.service.SearchInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -19,7 +20,7 @@ import java.util.*;
 public class SearchEventHandler {
 
     private final SearchInfoJdbcQueryRepository queryRepository;
-    private final SearchInfoJdbcCommandRepository commandRepository;
+    private final SearchInfoService searchInfoService;
 
     @Async("event-Executor1")
     @EventListener
@@ -31,15 +32,13 @@ public class SearchEventHandler {
 
         if(isExistInputSearchInfo(savedQueryList)){
             List<SearchInfo> searchInfoList = extractNewSearchQueryList(inputQueryList, savedQueryList, event.timestamp());
-            commandRepository.saveAll(searchInfoList);
-
             List<Integer> ids = getSavedSearchInfoIds(savedQueryList);
-            commandRepository.increaseSearchCount(ids);
+            searchInfoService.increaseAndSaveAll(searchInfoList, ids);
             return;
         }
 
         List<SearchInfo> inputSearchInfoList = SearchInfo.create(inputQueryList, event.timestamp());
-        commandRepository.saveAll(inputSearchInfoList);
+        searchInfoService.saveAll(inputSearchInfoList);
     }
 
     @Async("event-Executor2")
@@ -52,15 +51,13 @@ public class SearchEventHandler {
 
         if(isExistInputSearchInfo(savedQueryList)){
             List<SearchInfo> searchInfoList = extractNewSearchQueryList(inputQueryList, savedQueryList, event.timestamp());
-            commandRepository.saveAll(searchInfoList);
-
             List<Integer> ids = getSavedSearchInfoIds(savedQueryList);
-            commandRepository.increaseSearchCount(ids);
+            searchInfoService.increaseAndSaveAll(searchInfoList, ids);
             return;
         }
 
         List<SearchInfo> inputSearchInfoList = SearchInfo.create(inputQueryList, event.timestamp());
-        commandRepository.saveAll(inputSearchInfoList);
+        searchInfoService.saveAll(inputSearchInfoList);
     }
 
     private static boolean isExistInputSearchInfo(List<SearchInfoQueryResponse> savedQueryList) {
