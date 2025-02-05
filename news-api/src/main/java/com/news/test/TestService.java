@@ -9,6 +9,7 @@ import com.news.search.controller.response.SearchResponse;
 import com.news.search.controller.response.StatResponse;
 import com.news.search.service.WebQueryService;
 import com.news.search.service.event.SearchEvent;
+import com.news.search.service.event.SearchEvent2;
 import com.news.searchinfo.model.SearchInfo;
 import com.news.search.service.response.PageQueryResult;
 import com.news.search.service.response.SearchInfoQueryResponse;
@@ -66,6 +67,19 @@ public class TestService {
             log.info("검색결과 개수: {}", pageQueryResponse.size());
             eventPublisher.publishEvent(new SearchEvent(query, LocalDateTime.now()));
         }
+        DailyStat dailyStat = DailyStat.create("test", LocalDateTime.now()); // TODO 삭제
+        dailyStatCommandService.save(dailyStat);
+        return convertToPageResult(pageQueryResponse);
+    }
+
+    public PageResult<SearchResponse> searchWithEvent2(String query, int page, int size){
+        PageQueryResult<SearchQueryResponse> pageQueryResponse = webQueryService.search(query, page, size);
+        if(isNotEmptyQueryResponse(pageQueryResponse)){
+            log.info("검색결과 개수: {}", pageQueryResponse.size());
+            eventPublisher.publishEvent(new SearchEvent2(query, LocalDateTime.now()));
+        }
+        DailyStat dailyStat = DailyStat.create("test", LocalDateTime.now()); // TODO 삭제
+        dailyStatCommandService.save(dailyStat);
         return convertToPageResult(pageQueryResponse);
     }
 

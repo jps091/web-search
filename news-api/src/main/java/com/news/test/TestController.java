@@ -4,6 +4,7 @@ import com.news.search.controller.request.SearchRequest;
 import com.news.search.controller.response.PageResult;
 import com.news.search.controller.response.SearchResponse;
 import com.news.search.controller.response.StatResponse;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,11 +32,21 @@ public class TestController {
     }
 
     @GetMapping("/event")
-    public PageResult<SearchResponse> searchWithEvent(){
+    @RateLimiter(name = "apiRateLimiter")
+    public PageResult<SearchResponse> searchWithEventQueSize0(){
         String query = "Initialized JPA EntityManagerFactory for persistence unit default";
         int page = 1;
         int size = 15;
         return testService.searchWithEvent(query, page, size);
+    }
+
+    @GetMapping("/event10")
+    @RateLimiter(name = "apiRateLimiter")
+    public PageResult<SearchResponse> searchWithEventQueSize10(){
+        String query = "Initialized JPA EntityManagerFactory for persistence unit default";
+        int page = 1;
+        int size = 15;
+        return testService.searchWithEvent2(query, page, size);
     }
 
     @GetMapping("/jpa/stats")

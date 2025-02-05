@@ -15,18 +15,30 @@ import java.util.concurrent.Executor;
 @EnableAsync
 @Slf4j
 public class AsyncConfig implements AsyncConfigurer {
-    @Bean("event-Executor")
-    @Override
-    public Executor getAsyncExecutor() {
-        int coreCount = Runtime.getRuntime().availableProcessors();
+    @Bean("event-Executor1")
+    public Executor eventExecutor1() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(coreCount);  // 기본 스레드 수
-        executor.setMaxPoolSize(coreCount*2);  // 최대 스레드 수
+        executor.setCorePoolSize(2);  // 기본 스레드 수
+        executor.setMaxPoolSize(5);  // 최대 스레드 수
         executor.setQueueCapacity(10);  // 큐의 최대 수용량
-        executor.setKeepAliveSeconds(60);
+        executor.setKeepAliveSeconds(30);
         executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(60);
-        executor.setThreadNamePrefix("event-");
+        executor.setAwaitTerminationSeconds(10);
+        executor.setThreadNamePrefix("queue-size-0");
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean("event-Executor2")
+    public Executor eventExecutor2() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);  // 기본 스레드 수
+        executor.setMaxPoolSize(5);  // 최대 스레드 수
+        executor.setQueueCapacity(5);  // 큐의 최대 수용량
+        executor.setKeepAliveSeconds(30);
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(10);
+        executor.setThreadNamePrefix("queue-size-10");
         executor.initialize();
         return executor;
     }

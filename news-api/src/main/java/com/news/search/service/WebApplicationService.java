@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +26,7 @@ public class WebApplicationService {
     private final SearchInfoJdbcQueryRepository searchInfoJdbcQueryRepository;
     private final ApplicationEventPublisher eventPublisher;
 
+    @Transactional
     public PageResult<SearchResponse> search(String query, int page, int size){
         PageQueryResult<SearchQueryResponse> pageQueryResponse = webQueryService.search(query, page, size);
         if(isNotEmptyQueryResponse(pageQueryResponse)){
@@ -34,6 +36,7 @@ public class WebApplicationService {
         return convertToPageResult(pageQueryResponse);
     }
 
+    @Transactional(readOnly = true)
     public List<StatResponse> findTopQuery() {
         List<DailyStatQueryResponse> queryResponse = searchInfoJdbcQueryRepository.findTopQuery(QUERY_SIZE);
         return queryResponse.stream()
